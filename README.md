@@ -1,1 +1,1 @@
-# origami-installtion
+# origami-installation
