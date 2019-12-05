@@ -111,22 +111,22 @@ public class SpeakerSet {
     text(isTriggeringAnswer ? "touched" : "", x0 + 10, y0 + 50);
     
     line(x0 + distance, y0, x0 + distance, y0 + h);
-    text("User dist", x0 + distance, y0 + 50);
+    text("User dist", x0 + distance + 2, y0 + 50);
     
     stroke(0, 255, 0);
     fill(0, 255, 0);
     line(x0 + MAX_DIST, y0, x0 + MAX_DIST, y0 + h);
-    text("Max dist", x0 + MAX_DIST, y0 + 80);
+    text("Max dist", x0 + MAX_DIST + 2, y0 + 80);
     
     stroke(255, 0, 0);
     fill(255, 0, 0);
     line(x0 + MIN_DIST, y0, x0 + MIN_DIST, y0 + h);
-    text("Min dist", x0 + MIN_DIST, y0 + 110);
+    text("Min dist", x0 + MIN_DIST + 2, y0 + 110);
     
     stroke(255, 255, 0);
     fill(255, 255, 0);
     line(x0 + LIGHT_DIST, y0, x0 + LIGHT_DIST, y0 + h);
-    text("Light on thresh", x0 + LIGHT_DIST, y0 + 140);
+    text("Light-on thresh", x0 + LIGHT_DIST + 2, y0 + 140);
   }
 
   public void addAnswerFile (String filename) {
@@ -174,7 +174,7 @@ public class SpeakerSet {
       answerTriggerCounter = 0;
     }
     isTriggeringAnswer = trigger;
-    println("trigger: " + (isTriggeringAnswer ? "true" : "false") + " " + answerTriggerCounter);
+    //println("trigger: " + (isTriggeringAnswer ? "true" : "false") + " " + answerTriggerCounter);
   }
 
   public void setDistance (float distance) {
