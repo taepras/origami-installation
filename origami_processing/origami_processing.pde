@@ -46,6 +46,8 @@ void setup () {
     speakers[i].start();
   }
   
+  delay(500);
+  
   //speakers[0].setQuestionFile("q1/q1.mp3");
   //speakers[0].addAnswerFile("q1/answers/a1.mp3");
   //speakers[0].addAnswerFile("q1/answers/a2.mp3");
@@ -67,19 +69,14 @@ void draw () {
         boolean currentTrigger = Integer.parseInt(inParts[3].trim()) > 0;
         
         speakers[actionIndex].setDistance(distance);
-        //speakers[actionIndex].setQuestionVolume(qVolume);
-        if (currentTrigger && !lastTrigger) {
-            speakers[actionIndex].playRandomAnswer();
-        }
-        
-        lastTrigger = currentTrigger;
+        speakers[actionIndex].setAnswerTrigger(currentTrigger);
       }
     }
   }
   
   boolean anyAnswering = false;
   for (int i = 0; i < speakers.length; i++) {
-    anyAnswering = anyAnswering || speakers[i].isPlayingAnswer();
+    anyAnswering = anyAnswering || speakers[i].getIsPlayingAnswer();
   }
   
   for (int i = 0; i < speakers.length; i++) {
@@ -103,7 +100,7 @@ void mouseDragged () {
     int w = width;
     int h = height / speakers.length;
     if (x0 <= mouseX && mouseX <= x0 + w && y0 <= mouseY && mouseY <= y0 + h) {
-      speakers[i].setQuestionVolume((float)(mouseX - x0) / w);
+      speakers[i].setDistance(mouseX - x0);
     }
   }
 }
@@ -115,7 +112,7 @@ void mouseClicked () {
     int w = width;
     int h = height / speakers.length;
     if (x0 <= mouseX && mouseX <= x0 + w && y0 <= mouseY && mouseY <= y0 + h) {
-      speakers[i].playRandomAnswer();
+      speakers[i].playNextAnswer();
     }
   }
 }

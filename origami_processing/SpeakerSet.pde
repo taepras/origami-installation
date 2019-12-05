@@ -5,6 +5,7 @@ public class SpeakerSet {
   float MAX_DIST = 100;
   float LIGHT_DIST = 70;
   float FRAMES_TO_CHANGE_LIGHT = 10;
+  float FRAMES_TO_TRIGGER_ANSWER = 4;
     
   Minim minim;
   AudioOutput output;
@@ -36,6 +37,11 @@ public class SpeakerSet {
   float distance = 0;
   boolean isLightOn = false;
   
+  boolean isPlayingAnswer = false;
+  boolean isTriggeringAnswer = false;
+  
+  int answerTriggerCounter = 0;
+  
   public SpeakerSet (PApplet context, int index, String defaultFilename, Mixer.Info[] mixerInfo, int channel, Serial serial) {
     this.minim = new Minim(context);
     Mixer mixer = AudioSystem.getMixer(mixerInfo[channel]);
@@ -52,17 +58,28 @@ public class SpeakerSet {
     float actualTargetQuestionVolume = targetQuestionVolume;
     float actualTargetBgVolume = targetBgVolume * masterVolume;
     
-    if (currentAnswerIndex >= 0) {
+    if (isPlayingAnswer) {
       // done playing an answer
       if (!answerSounds.get(currentAnswerIndex).isPlaying()) {
-        if (serial != null) {
-          serial.write(this.index + ",0");
+        // if still holding trigger
+        if (isTriggeringAnswer && answerTriggerCounter >= FRAMES_TO_TRIGGER_ANSWER) {
+          delay(3000);
+          isPlayingAnswer = false;
+          playNextAnswer();
+        } else {
+          if (serial != null) {
+            serial.write(this.index + ",0");
+          }
+          delay(4000);
+          isPlayingAnswer = false;
         }
-        delay(5000);
-        currentAnswerIndex = -1;
       }
       actualTargetQuestionVolume = 0;
       actualTargetBgVolume = 0;
+    } else {
+      if (isTriggeringAnswer && answerTriggerCounter >= FRAMES_TO_TRIGGER_ANSWER) {
+        playNextAnswer();
+      }
     }
     
     if (currentQuestionVolume < actualTargetQuestionVolume) {
@@ -84,10 +101,12 @@ public class SpeakerSet {
   }
   
   public void draw (int x0, int y0, int w, int h) {
-    if (currentAnswerIndex >= 0)
+    if (isPlayingAnswer)
       fill(0, 0, 255);
     else
       fill(0);
+      
+    text(isTriggeringAnswer ? "touched" : "", x0 + 10, y0 + 50);
     stroke(255, 255, 255);
     rect(x0, y0, w, h);
     //line(x0 + currentQuestionVolume * w, y0, x0 + currentQuestionVolume * w, y0 + h);
@@ -113,23 +132,25 @@ public class SpeakerSet {
     setQuestionVolume(currentQuestionVolume);
   }
   
-  public void playRandomAnswer () {
-    if (isPlayingAnswer())
+  public void playNextAnswer () {
+    if (isPlayingAnswer)
       return;
     
-    currentAnswerIndex = (int)random(0, answerSounds.size());
+    currentAnswerIndex = (currentAnswerIndex + 1) % answerSounds.size();
     
     answerSounds.get(currentAnswerIndex).rewind();
     answerSounds.get(currentAnswerIndex).play();
+    isPlayingAnswer = true;
+    
+    if (serial != null) {
+      serial.write(this.index + ",1\n");
+      isLightOn = true;
+    }          
   }
 
   public void start () {
     backgroundSound.loop();
     questionSound.loop();
-  }
-  
-  public boolean isPlayingAnswer () {
-    return currentAnswerIndex >= 0;
   }
 
   public void setQuestionFadeInStartPoint (float thresh) {
@@ -138,6 +159,16 @@ public class SpeakerSet {
 
   public void setMasterVolume (float volume) {
     this.masterVolume = volume;
+  }
+  
+  public void setAnswerTrigger (boolean trigger) {
+    if (isTriggeringAnswer == trigger) {
+      answerTriggerCounter++;
+    } else {
+      answerTriggerCounter = 0;
+    }
+    isTriggeringAnswer = trigger;
+    println("trigger: " + (isTriggeringAnswer ? "true" : "false") + " " + answerTriggerCounter);
   }
 
   public void setDistance (float distance) {
@@ -163,12 +194,12 @@ public class SpeakerSet {
           lightChangeCounter =  0;
         }
         lightChangeCounter++;
-        if (lightChangeCounter >= FRAMES_TO_CHANGE_LIGHT && isLightOn) {
+        if (!isPlayingAnswer && lightChangeCounter >= FRAMES_TO_CHANGE_LIGHT && isLightOn) {
           serial.write(this.index + ",0\n");
           isLightOn = false;
         }
       }
-      println("light: " + lightChangeCounter);
+      //println("light: " + lightChangeCounter);
     }
   }
 
@@ -179,5 +210,9 @@ public class SpeakerSet {
 
   public void playQuestion () {
     backgroundSound.play();
+  }
+  
+  public boolean getIsPlayingAnswer () {
+    return isPlayingAnswer;
   }
 }
