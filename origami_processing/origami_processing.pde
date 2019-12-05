@@ -39,7 +39,7 @@ void setup () {
   for (int i = 0; i < speakers.length; i++) {
     speakers[i] = new SpeakerSet(this, i, "whispering-sounds.mp3", mixerInfo, SPEAKER_CHANNELS[i], serial);
     
-    speakers[i].setQuestionFile("q1/q1.mp3");
+    //speakers[i].setQuestionFile("q1/q1.mp3");
     speakers[i].addAnswerFile("q1/answers/a1.mp3");
     speakers[i].addAnswerFile("q1/answers/a2.mp3");
     speakers[i].addAnswerFile("q1/answers/a3.mp3");

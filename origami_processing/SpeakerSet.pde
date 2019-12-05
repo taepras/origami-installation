@@ -11,7 +11,7 @@ public class SpeakerSet {
   AudioOutput output;
   AudioPlayer backgroundSound;
 
-  AudioPlayer questionSound;
+  //AudioPlayer questionSound;
   ArrayList<AudioPlayer> answerSounds;
   PApplet context;
   
@@ -19,8 +19,8 @@ public class SpeakerSet {
   
   float questionFadeInStart = 0.5;
   
-  float currentQuestionVolume = 0;
-  float targetQuestionVolume = 0;
+  //float currentQuestionVolume = 0;
+  //float targetQuestionVolume = 0;
   
   float currentBgVolume = 0;
   float targetBgVolume = 0;
@@ -55,8 +55,8 @@ public class SpeakerSet {
   }
   
   public void update () {
-    float actualTargetQuestionVolume = targetQuestionVolume;
-    float actualTargetBgVolume = targetBgVolume * masterVolume;
+    //float actualTargetQuestionVolume = targetQuestionVolume;
+    float actualTargetBgVolume = targetBgVolume * masterVolume * (isPlayingAnswer ? 0 : 1);
     
     if (isPlayingAnswer) {
       // done playing an answer
@@ -74,7 +74,7 @@ public class SpeakerSet {
           isPlayingAnswer = false;
         }
       }
-      actualTargetQuestionVolume = 0;
+      //actualTargetQuestionVolume = 0;
       actualTargetBgVolume = 0;
     } else {
       if (isTriggeringAnswer && answerTriggerCounter >= FRAMES_TO_TRIGGER_ANSWER) {
@@ -82,11 +82,11 @@ public class SpeakerSet {
       }
     }
     
-    if (currentQuestionVolume < actualTargetQuestionVolume) {
-      currentQuestionVolume = min(currentQuestionVolume + maxVolumeStep, actualTargetQuestionVolume);
-    } else if (currentQuestionVolume > actualTargetQuestionVolume) {
-      currentQuestionVolume = max(currentQuestionVolume - maxVolumeStep, actualTargetQuestionVolume);
-    }
+    //if (currentQuestionVolume < actualTargetQuestionVolume) {
+    //  currentQuestionVolume = min(currentQuestionVolume + maxVolumeStep, actualTargetQuestionVolume);
+    //} else if (currentQuestionVolume > actualTargetQuestionVolume) {
+    //  currentQuestionVolume = max(currentQuestionVolume - maxVolumeStep, actualTargetQuestionVolume);
+    //}
     
     if (currentBgVolume < actualTargetBgVolume) {
       currentBgVolume = min(currentBgVolume + maxVolumeStep, actualTargetBgVolume);
@@ -94,10 +94,8 @@ public class SpeakerSet {
       currentBgVolume = max(currentBgVolume - maxVolumeStep, actualTargetBgVolume);
     }
     
-    //backgroundSound.setGain(map(currentBgVolume, this.questionFadeInStart, 1, MIN_VOL, MAX_VOL));
-    //questionSound.setGain(map(currentQuestionVolume, this.questionFadeInStart, 1, MIN_VOL, MAX_VOL));
     backgroundSound.setGain(map(currentBgVolume, 0, 1, MIN_VOL, MAX_VOL));
-    questionSound.setGain(map(currentQuestionVolume, this.questionFadeInStart, 1, MIN_VOL, MAX_VOL));
+    //questionSound.setGain(map(currentQuestionVolume, this.questionFadeInStart, 1, MIN_VOL, MAX_VOL));
   }
   
   public void draw (int x0, int y0, int w, int h) {
@@ -106,31 +104,39 @@ public class SpeakerSet {
     else
       fill(0);
       
-    text(isTriggeringAnswer ? "touched" : "", x0 + 10, y0 + 50);
     stroke(255, 255, 255);
     rect(x0, y0, w, h);
-    //line(x0 + currentQuestionVolume * w, y0, x0 + currentQuestionVolume * w, y0 + h);
+    
+    fill(255, 255, 255);
+    text(isTriggeringAnswer ? "touched" : "", x0 + 10, y0 + 50);
+    
     line(x0 + distance, y0, x0 + distance, y0 + h);
+    text("User dist", x0 + distance, y0 + 50);
+    
+    stroke(0, 255, 0);
+    fill(0, 255, 0);
+    line(x0 + MAX_DIST, y0, x0 + MAX_DIST, y0 + h);
+    text("Max dist", x0 + MAX_DIST, y0 + 80);
     
     stroke(255, 0, 0);
-    //line(x0 + questionFadeInStart * w, y0, x0 + questionFadeInStart * w, y0 + h);
-    stroke(0, 255, 0);
-    line(x0 + MAX_DIST, y0, x0 + MAX_DIST, y0 + h);
-    stroke(255, 0, 0);
+    fill(255, 0, 0);
     line(x0 + MIN_DIST, y0, x0 + MIN_DIST, y0 + h);
+    text("Min dist", x0 + MIN_DIST, y0 + 110);
+    
     stroke(255, 255, 0);
+    fill(255, 255, 0);
     line(x0 + LIGHT_DIST, y0, x0 + LIGHT_DIST, y0 + h);
-    //line(x0 + questionFadeInStart * w, y0, x0 + questionFadeInStart * w, y0 + h);
+    text("Light on thresh", x0 + LIGHT_DIST, y0 + 140);
   }
 
   public void addAnswerFile (String filename) {
     answerSounds.add(this.minim.loadFile(filename));
   }
 
-  public void setQuestionFile (String filename) {
-    questionSound = this.minim.loadFile(filename);
-    setQuestionVolume(currentQuestionVolume);
-  }
+  //public void setQuestionFile (String filename) {
+  //  questionSound = this.minim.loadFile(filename);
+  //  setQuestionVolume(currentQuestionVolume);
+  //}
   
   public void playNextAnswer () {
     if (isPlayingAnswer)
@@ -150,7 +156,7 @@ public class SpeakerSet {
 
   public void start () {
     backgroundSound.loop();
-    questionSound.loop();
+    //questionSound.loop();
   }
 
   public void setQuestionFadeInStartPoint (float thresh) {
@@ -175,9 +181,9 @@ public class SpeakerSet {
     
     this.distance = distance;
     
-    float volFromDist = map(distance, MAX_DIST, MIN_DIST, 0, 1);
+    float volFromDist = map(distance, MIN_DIST, MAX_DIST, 0, 1);
     volFromDist = constrain(volFromDist, 0, 1);
-    setQuestionVolume(volFromDist);
+    setBgVolume(volFromDist);
     
     if (serial != null) {
       if (this.distance < LIGHT_DIST) {
@@ -203,9 +209,12 @@ public class SpeakerSet {
     }
   }
 
-  public void setQuestionVolume (float volume) {
-    this.targetQuestionVolume = 0; //constrain(map(volume, 0, 0.8, 0, 1), 0, 1); //volume;
-    this.targetBgVolume = constrain(1 - volume, 0, 1);
+  public void setBgVolume (float volume) {
+    //this.targetQuestionVolume = 0; //constrain(map(volume, 0, 0.8, 0, 1), 0, 1); //volume;
+    if (isPlayingAnswer)
+      return;
+      
+    this.targetBgVolume = constrain(volume, 0, 1);
   }
 
   public void playQuestion () {
