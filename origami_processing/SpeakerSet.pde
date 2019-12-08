@@ -63,12 +63,13 @@ public class SpeakerSet {
       if (!answerSounds.get(currentAnswerIndex).isPlaying()) {
         // if still holding trigger
         if (isTriggeringAnswer && answerTriggerCounter >= FRAMES_TO_TRIGGER_ANSWER) {
-          delay(3000);
+          //delay(3000);
           isPlayingAnswer = false;
           playNextAnswer();
         } else {
           if (serial != null) {
-            serial.write(this.index + ",0");
+            println("sending: " + this.index + ",0");
+            serial.write(this.index + ",0\n");
           }
           delay(4000);
           isPlayingAnswer = false;
@@ -149,6 +150,7 @@ public class SpeakerSet {
     isPlayingAnswer = true;
     
     if (serial != null) {
+      println("sending: " + this.index + ",1");
       serial.write(this.index + ",1\n");
       isLightOn = true;
     }          
@@ -192,6 +194,7 @@ public class SpeakerSet {
         }
         lightChangeCounter--;
         if (lightChangeCounter <= FRAMES_TO_CHANGE_LIGHT && !isLightOn) {
+          println("sending: " + this.index + ",1");
           serial.write(this.index + ",1\n");
           isLightOn = true;
         }
@@ -201,6 +204,7 @@ public class SpeakerSet {
         }
         lightChangeCounter++;
         if (!isPlayingAnswer && lightChangeCounter >= FRAMES_TO_CHANGE_LIGHT && isLightOn) {
+          println("sending: " + this.index + ",0");
           serial.write(this.index + ",0\n");
           isLightOn = false;
         }

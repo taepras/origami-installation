@@ -7,7 +7,8 @@ import processing.serial.*;
 
 
 // config
-final int NUM_SPEAKERS = 1;
+final boolean PARTY_MODE = false;
+final int NUM_SPEAKERS = 3;
 final int[] SPEAKER_CHANNELS = {1, 1, 1, 1};
 final boolean ENABLE_SERIAL = true;
 final boolean DEBUG = true;
@@ -20,7 +21,7 @@ boolean lastTrigger;
 
 
 void setup () {
-  size(350, 200);
+  size(350, 600);
   
   serial = null;
   if (ENABLE_SERIAL) {
@@ -36,17 +37,74 @@ void setup () {
   
   speakers = new SpeakerSet[NUM_SPEAKERS];
   
-  for (int i = 0; i < speakers.length; i++) {
-    speakers[i] = new SpeakerSet(this, i, "whispering-sounds.mp3", mixerInfo, SPEAKER_CHANNELS[i], serial);
+  //for (int i = 0; i < speakers.length; i++) {
+  //  speakers[i] = new SpeakerSet(this, i, "whispering-sounds.mp3", mixerInfo, SPEAKER_CHANNELS[i], serial);
     
+  //  //speakers[i].setQuestionFile("q1/q1.mp3");
+  //  speakers[i].addAnswerFile("q1/answers/a1.mp3");
+  //  speakers[i].addAnswerFile("q1/answers/a2.mp3");
+  //  speakers[i].addAnswerFile("q1/answers/a3.mp3");
+  //  speakers[i].start();
+  //}
+  
+  speakers[0] = new SpeakerSet(this, 0, "whispering-sounds.mp3", mixerInfo, SPEAKER_CHANNELS[0], serial);
+    
+  //speakers[i].setQuestionFile("q1/q1.mp3");
+  speakers[0].addAnswerFile("answers/q1_1.mp3");
+  speakers[0].addAnswerFile("answers/q1_2.mp3");
+  speakers[0].addAnswerFile("answers/q1_3.mp3");
+  speakers[0].addAnswerFile("answers/q1_4.mp3");
+  speakers[0].addAnswerFile("answers/q1_5.mp3");
+  speakers[0].addAnswerFile("answers/q1_6.mp3");
+  speakers[0].addAnswerFile("answers/q1_7.mp3");
+  if (PARTY_MODE) {
+    speakers[0].addAnswerFile("answers/lol_end1.mp3");
+  }
+  speakers[0].start();
+  
+  
+  if (NUM_SPEAKERS > 1) {
+    
+    delay(3812);
+    
+    speakers[1] = new SpeakerSet(this, 1, "whispering-sounds.mp3", mixerInfo, SPEAKER_CHANNELS[1], serial);
+      
     //speakers[i].setQuestionFile("q1/q1.mp3");
-    speakers[i].addAnswerFile("q1/answers/a1.mp3");
-    speakers[i].addAnswerFile("q1/answers/a2.mp3");
-    speakers[i].addAnswerFile("q1/answers/a3.mp3");
-    speakers[i].start();
+    speakers[1].addAnswerFile("answers/q2_1.mp3");
+    speakers[1].addAnswerFile("answers/q2_2.mp3");
+    speakers[1].addAnswerFile("answers/q2_3.mp3");
+    speakers[1].addAnswerFile("answers/q2_4.mp3");
+    speakers[1].addAnswerFile("answers/q2_5.mp3");
+    speakers[1].addAnswerFile("answers/q2_6.mp3");
+    speakers[1].addAnswerFile("answers/q2_7.mp3");
+    if (PARTY_MODE) {
+      speakers[1].addAnswerFile("answers/q2_extra1.mp3");
+      speakers[1].addAnswerFile("answers/q2_extra2.mp3");
+      speakers[1].addAnswerFile("answers/q2_extra3.mp3");
+      speakers[1].addAnswerFile("answers/lol_end2.mp3");
+    }
+    speakers[1].start();
   }
   
-  delay(500);
+  if (NUM_SPEAKERS > 2) {
+    
+    delay(5021);
+    
+    speakers[2] = new SpeakerSet(this, 2, "whispering-sounds.mp3", mixerInfo, SPEAKER_CHANNELS[2], serial);
+      
+    //speakers[i].setQuestionFile("q1/q1.mp3");
+    speakers[2].addAnswerFile("answers/q3_1.mp3");
+    speakers[2].addAnswerFile("answers/q3_2.mp3");
+    speakers[2].addAnswerFile("answers/q3_3.mp3");
+    speakers[2].addAnswerFile("answers/q3_4.mp3");
+    speakers[2].addAnswerFile("answers/q3_5.mp3");
+    speakers[2].addAnswerFile("answers/q3_6.mp3");
+    speakers[2].addAnswerFile("answers/q3_7.mp3");
+    if (PARTY_MODE) {
+      speakers[2].addAnswerFile("answers/lol_end3.mp3");
+    }
+    speakers[2].start();
+  }
   
   //speakers[0].setQuestionFile("q1/q1.mp3");
   //speakers[0].addAnswerFile("q1/answers/a1.mp3");
@@ -57,11 +115,13 @@ void setup () {
 
 void draw () {
   background(255);
+  textSize(20);
   
   if (serial != null && serial.available() > 0) {
     String in = serial.readStringUntil('\n');
-    print(in);
+    
     if (in != null) {
+      print("receiving: " + in);
       String[] inParts = in.split(",");
       if (inParts[0].charAt(0) == 'p') {
         int actionIndex = Integer.parseInt(inParts[1].trim()); 

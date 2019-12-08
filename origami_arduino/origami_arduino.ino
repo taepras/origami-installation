@@ -3,7 +3,7 @@
 
 #include "OrigamiModule.h"
 
-const int NUM_MODULES = 1;
+const int NUM_MODULES = 3;
 OrigamiModule origamis[NUM_MODULES];
 
 const int CAP_THRESH_TOUCH = 8;
@@ -31,7 +31,9 @@ void setup() {
 
   // set up origami modules
   Serial.println("Setting up origami modules");
-  origamis[0].setup(0, 2, 3, 4, 6, 5, 10);
+  origamis[0].setup(0, 2, 43, 5, 6, 25, 10);
+  origamis[1].setup(1, 4, 47, 2, 3, 22, 10);
+  origamis[2].setup(2, 6, 51, 8, 9, 23, 10);
 //  for (int i = 0; i < NUM_MODULES; i++) {
 //    origamis[i].setup();
 //  }
