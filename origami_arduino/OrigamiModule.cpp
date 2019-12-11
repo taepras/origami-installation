@@ -1,7 +1,7 @@
 #include "OrigamiModule.h"
 
 
-void OrigamiModule::setup(int index, int pinTouchMpr121, int pinUltrasonicTrig, int pinUltrasonicEcho1, int pinUltrasonicEcho2, int pinRelay, int pinDistOut) {
+void OrigamiModule::setup(int index, int pinTouchMpr121, int pinUltrasonicTrig, int pinUltrasonicEcho1, int pinUltrasonicEcho2, int pinRelay, int pinDistOut, int capThresh) {
   _index = index;
   _pinTouchMpr121 = pinTouchMpr121;
   _pinUltrasonicTrig = pinUltrasonicTrig;
@@ -9,6 +9,7 @@ void OrigamiModule::setup(int index, int pinTouchMpr121, int pinUltrasonicTrig, 
   _pinUltrasonicEcho2 = pinUltrasonicEcho2;
   _pinRelay = pinRelay;
   _pinDistOut = pinDistOut;
+  _capThresh = capThresh;
   
   // set up relay
   pinMode(_pinRelay, OUTPUT);
@@ -17,7 +18,6 @@ void OrigamiModule::setup(int index, int pinTouchMpr121, int pinUltrasonicTrig, 
    pinMode(_pinUltrasonicTrig, OUTPUT);
    pinMode(_pinUltrasonicEcho1, INPUT);
    pinMode(_pinUltrasonicEcho2, INPUT);
-   pinMode(6, INPUT);
    pinMode(_pinDistOut, OUTPUT);
 
    digitalWrite(_pinRelay, LOW);
@@ -28,12 +28,21 @@ void OrigamiModule::setup(int index, int pinTouchMpr121, int pinUltrasonicTrig, 
 }
 
 void OrigamiModule::readAndEmit(uint16_t capReading) {
-  _currTouched = capReading & 1 << _pinTouchMpr121;
+  readAndEmit(capReading <= _capThresh);
+}
+
+void OrigamiModule::readAndEmit(bool capReading) {
+  _currTouched = capReading; // & 1 << _pinTouchMpr121;
   
   float d1 = readUltrasonic(_pinUltrasonicTrig, _pinUltrasonicEcho1);
   float d2 = readUltrasonic(_pinUltrasonicTrig, _pinUltrasonicEcho2);
 
   bool readError = d1 <= 0 && d2 <= 0;
+
+//  Serial.print("--------------------------------------------------------------");
+//  Serial.print(d1);
+//  Serial.print(" ");
+//  Serial.println(d2);
 
   if (!readError) {
     _currDist = d1 <= 0 ? d2 : d2 <= 0 ? d1 : min(d1, d2);
@@ -44,15 +53,20 @@ void OrigamiModule::readAndEmit(uint16_t capReading) {
       _ultraSonicTriggerCounter = max(_ultraSonicTriggerCounter - 1, -ULTRASONIC_COUNT_TRIG);
     }
   }
-//  else {
-//    _ultraSonicTriggerCounter = 0;
-//    _ultraSonicReleaseCounter = 0;
-//  }
+  else {
+    _currDist = DIST_MAX;
+    _currDistSmoothed = _sCoeff * _currDistSmoothed + (1 - _sCoeff) * _currDist;
+  }
 
   float ledLevel = map(_currDistSmoothed, DIST_MIN, DIST_MIN + (DIST_MAX - DIST_MIN) / 2, 255, 0);
   ledLevel = constrain(ledLevel, 0, 255);
   analogWrite(_pinDistOut, ledLevel);
-  
+
+  _lastTouched = _currTouched;
+  _lastDist = _currDist;
+}
+
+void OrigamiModule::printStatus() {
   Serial.print("p,");
   Serial.print(_index);
   Serial.print(",");
@@ -71,9 +85,6 @@ void OrigamiModule::readAndEmit(uint16_t capReading) {
 //  Serial.print(",");
 //  Serial.print((float)_ultraSonicTriggerCounter / ULTRASONIC_COUNT_TRIG);
   Serial.println();
-
-  _lastTouched = _currTouched;
-  _lastDist = _currDist;
 }
 
 void OrigamiModule::setLightOn (bool lightOn) {

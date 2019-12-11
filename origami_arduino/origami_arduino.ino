@@ -6,8 +6,12 @@
 const int NUM_MODULES = 3;
 OrigamiModule origamis[NUM_MODULES];
 
-const int CAP_THRESH_TOUCH = 8;
-const int CAP_THRESH_RELEASE = 4;
+const int CAP_THRESH_TOUCH = 3;
+const int CAP_THRESH_RELEASE = 3;
+
+const int CAP_THRESH_MANUAL = 48;
+
+const bool CALIBRATE = false;
 
 // You can have up to 4 on one i2c bus but one is enough for testing!
 Adafruit_MPR121 cap = Adafruit_MPR121();
@@ -31,9 +35,9 @@ void setup() {
 
   // set up origami modules
   Serial.println("Setting up origami modules");
-  origamis[0].setup(0, 2, 43, 5, 6, 25, 10);
-  origamis[1].setup(1, 4, 47, 2, 3, 22, 10);
-  origamis[2].setup(2, 6, 51, 8, 9, 23, 10);
+  origamis[0].setup(0, 2, 37, 2, 4, 22, 10, 43);
+  origamis[1].setup(1, 4, 44, 6, 8, 23, 10, 60);
+  origamis[2].setup(2, 6, 50, 11, 13, 25, 10, 43);
 //  for (int i = 0; i < NUM_MODULES; i++) {
 //    origamis[i].setup();
 //  }
@@ -44,10 +48,22 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  uint16_t currtouched = cap.touched();
-  
+//  boolean currTouched = cap.touched();
+\  
+  if (CALIBRATE) {
+    Serial.print(CAP_THRESH_MANUAL);
+    Serial.print("\t");
+  }
   for (int i = 0; i < NUM_MODULES; i++) {
-    origamis[i].readAndEmit(currtouched);
+    uint16_t currTouched = cap.filteredData(origamis[i].getCapTouchPin());
+    if (CALIBRATE) {
+      Serial.print(currTouched);
+      Serial.print("\t");
+    }
+    origamis[i].readAndEmit(currTouched);
+  }
+  if (CALIBRATE) {
+    Serial.println();
   }
 
   if (Serial.available() > 0) {
@@ -55,6 +71,12 @@ void loop() {
     int index = in.charAt(0) - '0';
     int lightOn = in.charAt(2) - '0';
     origamis[index].setLightOn(lightOn);
+  }
+
+  if (!CALIBRATE) {
+    for (int i = 0; i < NUM_MODULES; i++) {
+      origamis[i].printStatus();
+    }
   }
 
 //  // debugging info

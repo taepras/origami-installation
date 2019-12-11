@@ -1,11 +1,11 @@
 public class SpeakerSet {
-  float MIN_VOL = -30;
+  float MIN_VOL = -40;
   float MAX_VOL = 0;
-  float MIN_DIST = 30;
-  float MAX_DIST = 100;
-  float LIGHT_DIST = 70;
-  float FRAMES_TO_CHANGE_LIGHT = 10;
-  float FRAMES_TO_TRIGGER_ANSWER = 4;
+  float MIN_DIST = 70;
+  float MAX_DIST = 120;
+  float LIGHT_DIST = 80;
+  float FRAMES_TO_CHANGE_LIGHT = 3;
+  float FRAMES_TO_TRIGGER_ANSWER = 2;
     
   Minim minim;
   AudioOutput output;
@@ -71,7 +71,7 @@ public class SpeakerSet {
             println("sending: " + this.index + ",0");
             serial.write(this.index + ",0\n");
           }
-          delay(4000);
+          delay(1000);
           isPlayingAnswer = false;
         }
       }

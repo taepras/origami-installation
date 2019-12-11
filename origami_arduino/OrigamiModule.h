@@ -6,9 +6,13 @@
 class OrigamiModule {
 public:
   OrigamiModule () {};
-  void setup(int index, int pinTouchMpr121 = 2, int pinUltrasonicTrig = 3, int pinUltrasonicEcho = 4, int pinUltrasonicEcho2 = 6, int pinRelay = 5, int _pinDistOut = 10);
+  void setup(int index, int pinTouchMpr121 = 2, int pinUltrasonicTrig = 3, int pinUltrasonicEcho = 4, int pinUltrasonicEcho2 = 6, int pinRelay = 5, int _pinDistOut = 10, int capThresh = 45);
+  void readAndEmit(bool isTouching);
   void readAndEmit(uint16_t capReading);
 
+  int getCapTouchPin() { return _pinTouchMpr121; };
+
+  void printStatus();
   void setLightOn(bool on);
   
 //  void printDebug();
@@ -46,6 +50,8 @@ protected:
 
   float _currDistSmoothed = 0;
   float _sCoeff = 0.7;
+
+  int _capThresh;
 };
 
 #endif //ORIGAMI_MODULE
